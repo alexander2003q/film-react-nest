@@ -1,36 +1,100 @@
 # FILM!
 
-## Установка
+Приложение для просмотра киноафиши и бронирования билетов. Frontend написан на React, backend — на NestJS, данные хранятся в MongoDB.
 
-### MongoDB
+## Требования
 
-Установите MongoDB скачав дистрибутив с официального сайта или с помощью пакетного менеджера вашей ОС. Также можно воспользоваться Docker (см. ветку `feat/docker`.
+- Node.js 20+
+- npm
+- MongoDB или Docker
 
-Выполните скрипт `test/mongodb_initial_stub.js` в консоли `mongo`.
+## MongoDB
 
-### Бэкенд
+Для локальной MongoDB по умолчанию используется адрес `mongodb://localhost:27017/prac`.
 
-Перейдите в папку с исходным кодом бэкенда
+Базу можно запустить в Docker:
 
-`cd backend`
+```bash
+docker run --name film-react-nest-mongo -p 27017:27017 -d mongo:latest
+```
 
-Установите зависимости (точно такие же, как в package-lock.json) помощью команд
+При повторном запуске достаточно:
 
-`npm ci` или `yarn install --frozen-lockfile`
+```bash
+docker start film-react-nest-mongo
+```
 
-Создайте `.env` файл из примера `.env.example`, в нём укажите:
+Загрузите стартовые фильмы в коллекцию `prac.films`:
 
-* `DATABASE_DRIVER` - тип драйвера СУБД - в нашем случае это `mongodb` 
-* `DATABASE_URL` - адрес СУБД MongoDB, например `mongodb://127.0.0.1:27017/practicum`.  
+```bash
+docker cp backend/test/mongodb_initial_stub.json film-react-nest-mongo:/tmp/films.json
+docker exec film-react-nest-mongo mongoimport --db prac --collection films --file /tmp/films.json --jsonArray --drop
+```
 
-MongoDB должна быть установлена и запущена.
+Вместо Docker файл `backend/test/mongodb_initial_stub.json` можно импортировать в MongoDB Compass как JSON-массив.
 
-Запустите бэкенд:
+## Backend
 
-`npm start:debug`
+```bash
+cd backend
+npm ci
+cp .env.example .env
+npm run start:dev
+```
 
-Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
+Переменные в `backend/.env`:
 
+- `DATABASE_DRIVER` — драйвер базы, для проекта `mongodb`;
+- `DATABASE_URL` — адрес MongoDB;
+- `PORT` — HTTP-порт backend.
 
+По умолчанию API доступен по адресу `http://localhost:3000/api/afisha`.
 
+## Frontend
 
+Во втором терминале:
+
+```bash
+cd frontend
+npm ci
+cp .env.example .env
+npm run dev
+```
+
+Переменные в `frontend/.env`:
+
+- `VITE_API_URL` — базовый URL API;
+- `VITE_CDN_URL` — URL статических афиш.
+
+Frontend будет доступен по адресу `http://localhost:5173`.
+
+Если порт backend изменён, укажите тот же порт в `VITE_API_URL` и `VITE_CDN_URL`.
+
+## API
+
+- `GET /api/afisha/films`
+- `GET /api/afisha/films/:id/schedule`
+- `POST /api/afisha/order`
+- `GET /content/afisha/*`
+
+Спецификация находится в `film.yml`, коллекция Postman — в `film.postman.json`.
+
+## Проверка
+
+Backend:
+
+```bash
+cd backend
+npm run lint
+npm run build
+npm test -- --runInBand
+npm run test:e2e -- --runInBand
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
