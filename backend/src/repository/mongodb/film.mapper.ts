@@ -24,7 +24,7 @@ export class FilmMapper {
     return {
       id: entity.id,
       daytime: entity.daytime.toISOString(),
-      hall: String(entity.hall),
+      hall: entity.hall,
       rows: entity.rows,
       seats: entity.seats,
       price: entity.price,
@@ -53,7 +53,7 @@ export class FilmMapper {
       schedule: dto.schedule.map((item) => ({
         id: item.id,
         daytime: new Date(item.daytime),
-        hall: Number(item.hall),
+        hall: item.hall,
         rows: item.rows,
         seats: item.seats,
         price: item.price,

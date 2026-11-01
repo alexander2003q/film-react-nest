@@ -82,18 +82,14 @@ describe('Afisha API (e2e)', () => {
   });
 
   it('POST /api/afisha/order reserves a seat and rejects it next time', async () => {
-    const order = {
-      email: 'test@example.com',
-      phone: '+70000000000',
-      tickets: [
-        {
-          film: film.id,
-          session: film.schedule[0].id,
-          row: 1,
-          seat: 2,
-        },
-      ],
-    };
+    const order = [
+      {
+        film: film.id,
+        session: film.schedule[0].id,
+        row: 1,
+        seat: 2,
+      },
+    ];
 
     const response = await request(app.getHttpServer())
       .post('/api/afisha/order')
@@ -141,7 +137,7 @@ function createFilm(): FilmWithScheduleDto {
       {
         id: 'session-id',
         daytime: '2024-06-28T07:00:53.000Z',
-        hall: '1',
+        hall: 1,
         rows: 5,
         seats: 10,
         price: 350,

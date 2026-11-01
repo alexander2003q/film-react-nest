@@ -17,7 +17,7 @@ describe('FilmMapper', () => {
       {
         id: 'session-id',
         daytime: '2024-06-28T07:00:53.000Z',
-        hall: '2',
+        hall: 2,
         rows: 5,
         seats: 10,
         price: 350,

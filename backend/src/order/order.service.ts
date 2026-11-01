@@ -24,7 +24,7 @@ interface ValidatedReservationGroup extends ReservationGroup {
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
-  async create(order: OrderDto): Promise<OrderResponseDto> {
+  async create(order: OrderDto | CreateTicketDto[]): Promise<OrderResponseDto> {
     const groups = await this.validateGroups(this.groupTickets(order));
 
     const reservedGroups: ValidatedReservationGroup[] = [];
@@ -67,15 +67,19 @@ export class OrderService {
     };
   }
 
-  private groupTickets(order: OrderDto): ReservationGroup[] {
-    if (!order || !Array.isArray(order.tickets) || order.tickets.length === 0) {
+  private groupTickets(
+    order: OrderDto | CreateTicketDto[],
+  ): ReservationGroup[] {
+    const tickets = Array.isArray(order) ? order : order?.tickets;
+
+    if (!Array.isArray(tickets) || tickets.length === 0) {
       throw this.badRequest('The order must contain at least one ticket');
     }
 
     const groups = new Map<string, ReservationGroup>();
     const requestedSeats = new Set<string>();
 
-    for (const ticket of order.tickets) {
+    for (const ticket of tickets) {
       if (!ticket?.film || !ticket.session) {
         throw this.badRequest('Film and session identifiers are required');
       }

@@ -43,6 +43,18 @@ describe('OrderService', () => {
     expect(result.items[0].id).toEqual(expect.any(String));
   });
 
+  it('accepts tickets sent as a request body array', async () => {
+    const tickets = [{ film: film.id, session: 'session-1', row: 2, seat: 3 }];
+
+    const result = await service.create(tickets);
+
+    expect(repository.reserveSeats).toHaveBeenCalledWith(film.id, 'session-1', [
+      '2:3',
+    ]);
+    expect(result.total).toBe(1);
+    expect(result.items[0]).toMatchObject(tickets[0]);
+  });
+
   it('rejects duplicate seats in one order', async () => {
     const ticket = { film: film.id, session: 'session-1', row: 1, seat: 2 };
 
@@ -117,7 +129,7 @@ function createFilm(): FilmWithScheduleDto {
       {
         id: 'session-1',
         daytime: '2024-06-28T07:00:53.000Z',
-        hall: '1',
+        hall: 1,
         rows: 5,
         seats: 10,
         price: 350,
@@ -126,7 +138,7 @@ function createFilm(): FilmWithScheduleDto {
       {
         id: 'session-2',
         daytime: '2024-06-28T10:00:53.000Z',
-        hall: '2',
+        hall: 2,
         rows: 5,
         seats: 10,
         price: 400,
