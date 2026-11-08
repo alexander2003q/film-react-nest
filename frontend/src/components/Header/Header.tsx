@@ -16,7 +16,12 @@ export function Header({ counter, onClick }: HeaderProps) {
                     alt="Film! logo"
                 />
             </a>
-            <button className={styles.basket} onClick={onClick}>
+            <button
+                className={styles.basket}
+                onClick={onClick}
+                disabled={counter === 0}
+                aria-label={`Корзина, билетов: ${counter}`}
+            >
                 <span className={styles.counter}>{counter}</span>
             </button>
         </header>

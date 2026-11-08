@@ -26,6 +26,11 @@
 		position: relative;
 		cursor: pointer;
 
+		&:disabled {
+			cursor: default;
+			opacity: 0.6;
+		}
+
 		.counter {
 			position: absolute;
 			display: flex;

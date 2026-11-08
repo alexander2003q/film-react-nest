@@ -9,6 +9,10 @@ export type BasketProps = {
 }
 
 export function Basket({ items, onDelete }: BasketProps) {
+    if (items.length === 0) {
+        return <p className={styles.empty}>Корзина пуста</p>;
+    }
+
     return (
         <div className={styles.basket}>
             {items.map((item) => <Ticket
