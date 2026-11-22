@@ -22,6 +22,7 @@ export type Actions =
     | { type: 'addToBasket', payload: string }
     | { type: 'removeFromBasket', payload: string }
     | { type: 'setContacts', payload: Contacts }
+    | { type: 'setError', payload: string }
     | { type: 'openModal', payload: Modals }
     | { type: 'closeModal' }
     | { type: 'clearBasket' };
@@ -82,12 +83,13 @@ const removeTicket = (state: AppState, key: string): AppState => {
 
 const validateOrder = (state: AppState): AppState => {
     const errors = [];
-    //validate email with regexp
-    if (state.contacts.email && !/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/.test(state.contacts.email)) {
+
+    if (state.contacts.email && !/^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$/.test(state.contacts.email)) {
         errors.push('Некорректный email');
     }
-    //validate phone with regexp
-    if (state.contacts.phone && !/\+7\d{10}/.test(state.contacts.phone)) {
+
+    const phone = state.contacts.phone.replace(/\D/g, '');
+    if (state.contacts.phone && !/^7\d{10}$/.test(phone)) {
         errors.push('Некорректный телефон');
     }
 
@@ -112,17 +114,20 @@ export function appReducer(state: AppState, action: Actions): AppState {
             return {
                 ...state,
                 films: action.payload,
-                selectedFilm: action.payload[0].id
+                selectedFilm: action.payload[0]?.id ?? null
             };
         case 'selectFilm':
             return {
                 ...state,
-                selectedFilm: action.payload
+                selectedFilm: action.payload,
+                schedule: [],
+                selectedSession: null
             };
         case 'setSchedule':
             return {
                 ...state,
                 schedule: action.payload,
+                selectedSession: null,
                 modal: 'schedule'
             };
         case 'selectSession':
@@ -137,21 +142,44 @@ export function appReducer(state: AppState, action: Actions): AppState {
                 ...state,
                 contacts: action.payload
             });
-        case 'openModal':
+        case 'setError':
             return {
                 ...state,
-                modal: action.payload
+                message: action.payload,
+                isError: true
+            };
+        case 'openModal':
+            if (action.payload === 'contacts') {
+                return validateOrder({
+                    ...state,
+                    modal: action.payload
+                });
+            }
+
+            return {
+                ...state,
+                modal: action.payload,
+                message: '',
+                isError: false
             };
         case 'closeModal':
             return {
                 ...state,
-                modal: null
+                modal: null,
+                message: '',
+                isError: false
             };
         case 'clearBasket':
             return {
                 ...state,
                 selectedSession: null,
-                basket: []
+                basket: [],
+                contacts: {
+                    email: '',
+                    phone: ''
+                },
+                message: '',
+                isError: false
             };
     }
     return state;

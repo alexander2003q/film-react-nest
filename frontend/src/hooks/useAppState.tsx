@@ -39,6 +39,10 @@ export function useAppState() {
     const setContacts = (contacts: Contacts) => dispatch({ type: 'setContacts', payload: contacts });
 
     const orderTickets = () => {
+        if (!state.contacts.email || !state.contacts.phone || state.isError) {
+            return;
+        }
+
         api.current.orderTickets({
             email: state.contacts.email,
             phone: state.contacts.phone,
@@ -46,6 +50,11 @@ export function useAppState() {
         }).then(() => {
             dispatch({ type: 'clearBasket' });
             dispatch({ type: 'openModal', payload: 'success' });
+        }).catch((error: unknown) => {
+            const message = typeof error === 'string'
+                ? error
+                : 'Не удалось оформить заказ';
+            dispatch({ type: 'setError', payload: message });
         });
     };
 
@@ -77,7 +86,7 @@ export function useAppState() {
             'contacts': <Button
                 label={"Оплатить"}
                 onClick={orderTickets}
-                disabled={!state.contacts.email || !state.contacts.phone}
+                disabled={!state.contacts.email || !state.contacts.phone || state.isError}
             />,
             'success': null
         };

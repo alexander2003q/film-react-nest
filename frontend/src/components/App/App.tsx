@@ -16,6 +16,16 @@ import {useAppState} from "../../hooks/useAppState.tsx";
 function App() {
     const { state, data, handlers } = useAppState();
 
+    const header = state.modal && data.preview
+        ? state.modal === 'schedule'
+            ? <FilmInfo {...data.preview} description={data.preview.about} isCompact={true} />
+            : <ModalHeader
+                title={state.modal === 'basket' ? 'Корзина' : data.preview.title}
+                description={state.modal === 'basket' ? 'Выбранные билеты' : data.preview.about}
+                onClick={handlers.go('prev')}
+            />
+        : null;
+
     return (<>
         <Layout isLocked={!!state.modal}>
            <Header counter={state.basket.length} onClick={handlers.handleOpenBasket} />
@@ -31,15 +41,7 @@ function App() {
             onClose={handlers.closeModal}
             message={state.message}
             isError={state.isError}
-            header={
-                (state.modal === 'schedule')
-                    ? <FilmInfo {...data.preview} description={data.preview.about} isCompact={true} />
-                    : <ModalHeader
-                        title={data.preview.title}
-                        description={data.preview.about}
-                        onClick={handlers.go('prev')}
-                    />
-            }
+            header={header}
             actions={handlers.getAction()}
         >
             {(state.modal === 'schedule') && <SelectSession
