@@ -1,12 +1,12 @@
 # FILM!
 
-Приложение для просмотра киноафиши и бронирования билетов. Frontend написан на React, backend — на NestJS, данные хранятся в MongoDB.
+Приложение для просмотра киноафиши и бронирования билетов. Frontend написан на React, backend — на NestJS. Хранилище выбирается переменной `DATABASE_DRIVER`: поддерживаются MongoDB и PostgreSQL.
 
 ## Требования
 
 - Node.js 20+
 - npm
-- MongoDB или Docker
+- MongoDB, PostgreSQL или Docker
 
 ## MongoDB
 
@@ -33,6 +33,30 @@ docker exec film-react-nest-mongo mongoimport --db prac --collection films --fil
 
 Вместо Docker файл `backend/test/mongodb_initial_stub.json` можно импортировать в MongoDB Compass как JSON-массив.
 
+## PostgreSQL
+
+Запустите PostgreSQL, например в Docker:
+
+```bash
+docker run --name film-react-nest-postgres \
+  -e POSTGRES_USER=prac \
+  -e POSTGRES_PASSWORD=prac \
+  -e POSTGRES_DB=prac \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+```
+
+Создайте таблицы и загрузите тестовые данные:
+
+```bash
+cd backend
+psql -h localhost -U prac -d prac -f test/prac.init.sql
+psql -h localhost -U prac -d prac -f test/prac.films.sql
+psql -h localhost -U prac -d prac -f test/prac.shedules.sql
+```
+
+Для PostgreSQL установите в `.env` значение `DATABASE_DRIVER=postgres`. Можно передать полный PostgreSQL URI в `DATABASE_URL` либо использовать `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` и `DATABASE_NAME`.
+
 ## Backend
 
 ```bash
@@ -44,8 +68,9 @@ npm run start:dev
 
 Переменные в `backend/.env`:
 
-- `DATABASE_DRIVER` — драйвер базы, для проекта `mongodb`;
-- `DATABASE_URL` — адрес MongoDB;
+- `DATABASE_DRIVER` — `mongodb` или `postgres`;
+- `DATABASE_URL` — адрес MongoDB, PostgreSQL URI или имя хоста PostgreSQL;
+- `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME` — параметры PostgreSQL, если не используется URI;
 - `PORT` — HTTP-порт backend.
 
 По умолчанию API доступен по адресу `http://localhost:3000/api/afisha`.
